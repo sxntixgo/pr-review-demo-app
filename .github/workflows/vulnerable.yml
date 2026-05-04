@@ -1,0 +1,39 @@
+###############################################################################
+# DELIBERATELY VULNERABLE workflow file.
+#
+# Reviewed in Demo 3 of the "Claude Skills for Security" talk. The auditor
+# should flag every one of the following:
+#
+#   1. pull_request_target trigger combined with checkout of the PR head
+#      means untrusted attacker code runs WITH access to repo secrets.
+#      This is the Tj-actions / Ultralytics class of supply-chain bug.
+#   2. anthropics/claude-code-action pinned to @main: any push to that
+#      action's main branch silently ships into this workflow.
+#   3. ANTHROPIC_API_KEY and a Personal Access Token (GITHUB_PAT) are both
+#      injected into the AI agent step, which runs over fork-controlled
+#      code.
+#
+# Note: GitHub Actions is disabled at the repo level. This file is a static
+# fixture for the auditor to read, not an active CI job.
+###############################################################################
+
+name: AI security review on PR
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: anthropics/claude-code-action@main
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_PAT }}
+        with:
+          prompt: "Review the diff for security issues."

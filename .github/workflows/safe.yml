@@ -1,0 +1,39 @@
+###############################################################################
+# Safe AI security review workflow.
+#
+# Reviewed in Demo 3 of the "Claude Skills for Security" talk as the
+# counter-example to vulnerable.yml.
+#
+# What makes this safe:
+#   * pull_request trigger (not pull_request_target). Untrusted PR code is
+#     never given access to the repo's secrets.
+#   * Action pinned by commit SHA, not @main. Prevents an upstream
+#     compromise from silently shipping new code.
+#   * Permissions block scopes the GITHUB_TOKEN to read-only.
+#   * Secret access is intentionally absent.
+#
+# Note: GitHub Actions is disabled at the repo level. This file is a static
+# fixture for the auditor to read, not an active CI job.
+###############################################################################
+
+name: Safe AI security review on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head (untrusted, no secrets in scope)
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+
+      - name: Run security review (pinned action, no repo secrets exposed)
+        uses: anthropics/claude-code-action@d6b8a6c1e02fa8bdb6a7b1f0e6c3c6a3f1a2b3c4  # vX.Y.Z
+        with:
+          prompt: "Review the diff for security issues."

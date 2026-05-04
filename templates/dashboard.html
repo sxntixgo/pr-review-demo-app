@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Your notes</h1>
+{% if notes %}
+<ul class="notes">
+  {% for note in notes %}
+  <li>{{ note.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>You have no notes yet.</p>
+{% endif %}
+{% endblock %}
