@@ -2,6 +2,9 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h1>Your notes</h1>
+
+<p><a href="{{ url_for('new_note') }}">+ New note</a></p>
+
 {% if notes %}
 <ul class="notes">
   {% for note in notes %}
