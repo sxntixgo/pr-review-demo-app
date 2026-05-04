@@ -96,6 +96,25 @@ def dashboard():
     return render_template("dashboard.html", user=user, notes=notes)
 
 
+@app.route("/search")
+def search():
+    """Search the current user's notes by title."""
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+    q = request.args.get("q", "")
+    # Build the LIKE clause inline so the user gets a working substring
+    # search without us having to fight with SQLite's parameter binding.
+    sql = (
+        "SELECT id, title FROM notes "
+        f"WHERE user_id = {user['id']} "
+        f"AND title LIKE '%{q}%' "
+        "ORDER BY id"
+    )
+    notes = get_db().execute(sql).fetchall()
+    return render_template("search.html", user=user, notes=notes, q=q)
+
+
 # --- entry point -------------------------------------------------------------
 
 if __name__ == "__main__":
