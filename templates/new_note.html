@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}New note{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('dashboard') }}">&larr; Back to dashboard</a></p>
+<h1>New note</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" action="{{ url_for('new_note') }}">
+  <p><label>Title<br>
+    <input name="title" maxlength="100" required autofocus>
+  </label></p>
+  <p><label>Body<br>
+    <textarea name="body" rows="6" cols="60" maxlength="10000"></textarea>
+  </label></p>
+  <p><button type="submit">Create note</button></p>
+</form>
+{% endblock %}

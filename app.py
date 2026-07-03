@@ -96,6 +96,43 @@ def dashboard():
     return render_template("dashboard.html", user=user, notes=notes)
 
 
+# Limits enforced server-side; the form has matching maxlength attributes.
+MAX_TITLE_LEN = 100
+MAX_BODY_LEN = 10_000
+
+
+@app.route("/notes/new", methods=["GET", "POST"])
+def new_note():
+    """Create a new note belonging to the logged-in user."""
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    if request.method == "GET":
+        return render_template("new_note.html", user=user, error=None)
+
+    title = (request.form.get("title") or "").strip()
+    body = (request.form.get("body") or "").strip()
+
+    if not title:
+        return render_template("new_note.html", user=user,
+                               error="Title is required."), 400
+    if len(title) > MAX_TITLE_LEN:
+        return render_template("new_note.html", user=user,
+                               error=f"Title must be {MAX_TITLE_LEN} chars or fewer."), 400
+    if len(body) > MAX_BODY_LEN:
+        return render_template("new_note.html", user=user,
+                               error=f"Body must be {MAX_BODY_LEN} chars or fewer."), 400
+
+    db = get_db()
+    db.execute(
+        "INSERT INTO notes (user_id, title, body) VALUES (?, ?, ?)",
+        (user["id"], title, body),
+    )
+    db.commit()
+    return redirect(url_for("dashboard"))
+
+
 # --- entry point -------------------------------------------------------------
 
 if __name__ == "__main__":
