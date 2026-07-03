@@ -96,6 +96,22 @@ def dashboard():
     return render_template("dashboard.html", user=user, notes=notes)
 
 
+@app.route("/notes/<int:note_id>")
+def view_note(note_id):
+    """Show a single note by id."""
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+    # Look up the note by id only and render it.
+    note = get_db().execute(
+        "SELECT id, user_id, title, body FROM notes WHERE id = ?",
+        (note_id,),
+    ).fetchone()
+    if not note:
+        abort(404)
+    return render_template("note.html", user=user, note=note)
+
+
 # --- entry point -------------------------------------------------------------
 
 if __name__ == "__main__":
