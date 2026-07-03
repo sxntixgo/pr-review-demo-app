@@ -2,6 +2,12 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h1>Your notes</h1>
+
+<form method="get" action="{{ url_for('search') }}" class="inline">
+  <input name="q" placeholder="Search notes..." aria-label="Search">
+  <button type="submit">Search</button>
+</form>
+
 {% if notes %}
 <ul class="notes">
   {% for note in notes %}
